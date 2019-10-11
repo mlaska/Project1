@@ -38,6 +38,9 @@ Project Question:
     not enough data to provide insight to the overall success of the program
     issues with API documentation muddling ability to create api to pull data
       Mitigation: download file of data from site provided and create function to analyze CSV file instead
-        
+
+   Parking Lot
+     Make a heatmap to show the movement of scooters over time
+     
      
       
