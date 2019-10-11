@@ -1,0 +1,10 @@
+10/10/2019 
+Query URL is loated in the opendata.minneapolis.gov
+Loop through and grab all the data
+
+We have found that there are nulls in the start location
+We have found that there are data types other than int for the start loctaion
+
+Looping using a number rather than a list
+API = :( 
+Using CSV for both census and Scooter
