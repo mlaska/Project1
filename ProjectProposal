@@ -1,0 +1,43 @@
+Project Question:
+ Is the Minneapolis Scooter Pilot Program successfully serving low income populations as defined by their goals?
+ 
+ Goals: 
+ in this project we will be reviewing Scooter placement and movement over time in the city of Minneapolis. 
+ We would like to provide data correlating scooter use to low income areas via heat mapping
+ 
+ In Scope 
+  Utilizing data/API from Minneapolis.gov providing detailed scooter tracking informaion
+    Utlizing datapoints provided May, 2019 through Aug, 2019
+  Utilizing data/API from US Census.org (2017 Census data) to provie information on population and Low income areas
+    Correlating low income by Zip Code
+  
+  Out of Scope
+    Differentiating Scooters by Brand
+    Calculations adjusting 2017 census data to reflect 2019 incomes
+    
+  Dependencies
+    Ensuring data from Scooter database can be matched to Us Census data by Zip Code
+  
+  Level of Effort
+    Creation of a Funtion to perform the following
+      Merge each month of scooter data into one DataFrame
+      Loop through each Location ID using the Minneapolis.gov API to identify the zipcode of each location
+    Creation of a Function to perform the following
+      Loop through US Census.gov API to pull all income data for Zip codes associated with the Minneapolis area
+      Create a DataFrame of this data
+    Creation of a fuction to perform the following
+      Combine DataFrames from both above functions on start zipcode into a DataFrame with scooter and income data
+      Create Plots 
+        visualizing Low income areas over time by scooter start Date
+        Visualizing income heat map of Minneapolis by zipcode
+        Visualizing Scooter Catchment data
+        Visualizing Trends of scooter Low income start vs High income start over time
+        Month by Month plotting of Scooter placement (comparing how scooter movement is changing over time) 
+        
+   Risks
+    not enough data to provide insight to the overall success of the program
+    issues with API documentation muddling ability to create api to pull data
+      Mitigation: download file of data from site provided and create function to analyze CSV file instead
+        
+     
+      
