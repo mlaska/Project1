@@ -6,6 +6,8 @@
 #                               Merges appropriate data and cleans dataframe. Final csv saved as
 #                               "data_complete.csv"
 
+#                            3- Scrub CSV file
+
 #Function (1)census_api. x_value is Poverty Type threshold (%) (default, 10.5--MN average Poverty Rate in 2017)
 
 def census_api(x_value):
@@ -138,4 +140,119 @@ def read_files():
     print("")
     print("External csv files from Open Data Minneapolis, ")
     print("      http://opendata.minneapolismn.gov/datasets/scooter-availability")
-    print("      http://opendata.minneapolismn.gov/datasets/mpls-centerline")      
+    print("      http://opendata.minneapolismn.gov/datasets/mpls-centerline") 
+    
+    
+#--------------------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------------
+
+#Function 3-  Scrub "data_complete" or "scooter_6AM" csv type files.  Drop NA rows (scooters located on trails), 
+#              reindex, merge 'Date' column to M/D format for better plot presentation
+
+def clean_file(filename):
+    
+    import matplotlib.pyplot as plt
+    import pandas as pd
+    
+    #data_complete = pd.read_csv("Scooter_df_HrsAndDays.csv")
+    data_complete = pd.read_csv(filename)
+    
+    data_complete = data_complete.dropna()
+    data_complete['Zipcode'] = data_complete['Zipcode'].astype(str)
+    data_complete = data_complete.sort_values(by=['Month', 'Day'])
+    data_complete.reset_index(inplace = True, drop = True)
+    
+    #Create smaller dataframe of just scooter counts at one time of day (6AM)
+    what_time = data_complete['Hour'] == 6
+
+    data_morning = data_complete[what_time]
+    
+    data_morning = data_morning.dropna()
+    data_morning = data_morning.sort_values(by=['Month', 'Day'])
+    data_morning.reset_index(inplace = True, drop = True)
+    data_morning['Month'] = data_morning['Month'].astype(str)
+    data_morning['Day'] = data_morning['Day'].astype(str)
+    
+    #Even smaller dataframe.  Scooter counts from one time of day AND of just the Poor zipcodes
+     
+    p_type =  data_complete['Poverty Type'] == 'Low'
+
+    data_sub = data_morning[p_type]
+    
+    data_sub_gr = data_sub.groupby(["Month", "Day"])
+    data_morning_gr = data_morning.groupby(["Month", "Day"])
+
+    totals = data_sub_gr['NumberAvailable'].sum()
+
+    overall = data_morning_gr['NumberAvailable'].sum()
+
+    percent = (totals.values / overall.values)*100
+
+    y_value = percent
+    
+    
+    #Create list of '/' or '/0' to join Day and Month into one column
+    
+    date_slash = []
+    integers = ['1','2','3','4','5','6','7','8','9']
+    error_count = 0
+    
+    for i in range(len(data_morning)):
+
+        try:
+            if data_morning.loc[i,'Day'] in integers:
+                date_slash.append('/0')
+            else:
+                date_slash.append('/')
+                
+        except (KeyError):
+            print(f"KeyError on index {i}")
+            error_count += 1
+            date_slash.append('?')
+            
+    data_morning['Date'] = data_morning['Month'].str.cat(date_slash)
+    data_morning['Date'] = data_morning['Date'].str.cat(data_morning['Day'])
+    
+    
+
+    
+    data_morning = data_morning[['CompanyName', 'NumberAvailable', 'Zipcode', 
+                                 'Poverty Rate', 'Poverty Type',
+                                  'Hour', 'Day','Month', 'Date']]
+
+    #Save new df to CSV
+    new_file = f'6AM_{filename}'
+    
+       # Note to avoid any issues later, use encoding="utf-8"
+    data_morning.to_csv(new_file, encoding="utf-8", index=False)
+    
+    print(f'New scrubbed file created, {new_file}')
+    print('')
+    print(data_morning.head())
+    
+    
+ #------Plot Line Function--------------------
+
+
+#def plot_line():
+    
+    dates = data_morning.Date.unique()
+    
+    
+    fig, ax = plt.subplots()
+
+    fig.suptitle("Percent of Scooters in Poor Neighborhoods", fontsize=14, fontweight="bold")
+    plt.title("Recorded daily at 6 AM", fontsize=10, fontweight="bold")
+    ax.set_xlim(0, len(totals))
+    ax.set_ylim(0, y_value.max()+5)
+    ax.set_xlabel("Days (May 17 to Sep 22)")
+    ax.set_ylabel("Percent (%)")
+    ax.xaxis.set_major_locator(plt.MaxNLocator(6))
+    ax.axhline(y=30, dashes = [5,10], linewidth=2, color='r')
+    ax.plot(dates, y_value, linewidth=0.7)
+
+    # Save the Figure
+    plt.savefig(f"10_LineGraph_Poor_6AM.png")
+    print(f'Saving image file, 10_LineGraph_Poor_6AM.png')
+    plt.show()
